@@ -1,0 +1,12 @@
+{
+  "name": "clipz",
+  "version": "1.0.0",
+  "description": "A simple short-form video platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
