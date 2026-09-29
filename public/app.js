@@ -29,20 +29,14 @@ const state = {
 // --------------------------------------------------
 
 async function api(url, options = {}) {
-    const response = await fetch(url, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...(options.headers || {})
-        }
-    });
+    const response = await fetch(url, options);
 
-    let data;
+    let data = null;
 
     try {
         data = await response.json();
     } catch {
-        data = null;
+        // Response wasn't JSON.
     }
 
     if (!response.ok) {
@@ -64,7 +58,10 @@ async function checkServer() {
 
         console.log("Clipz server:", data.message);
     } catch (error) {
-        console.error("Could not connect to Clipz server:", error);
+        console.error(
+            "Could not connect to Clipz server:",
+            error
+        );
     }
 }
 
@@ -141,19 +138,25 @@ function handlePage(page) {
 }
 
 // --------------------------------------------------
-// Pages
+// Home
 // --------------------------------------------------
 
 function showHome() {
     loadFeed(state.currentFeed);
 }
 
+// --------------------------------------------------
+// Discover
+// --------------------------------------------------
+
 function showDiscover() {
     feed.innerHTML = `
         <article class="video-card placeholder">
             <div class="placeholder-content">
                 <div class="play-icon">⌕</div>
+
                 <h1>Discover</h1>
+
                 <p>
                     Search and discover new Clipz here.
                 </p>
@@ -162,57 +165,220 @@ function showDiscover() {
     `;
 }
 
+// --------------------------------------------------
+// Upload
+// --------------------------------------------------
+
 function showUpload() {
     feed.innerHTML = `
         <article class="video-card placeholder">
-            <div class="placeholder-content">
+            <div class="placeholder-content upload-page">
+
                 <div class="play-icon">＋</div>
-                <h1>Upload</h1>
+
+                <h1>Upload a Clip</h1>
+
                 <p>
-                    Video uploading will be added here.
+                    Choose a video from your device.
                 </p>
-                <button id="uploadPlaceholderButton" type="button">
-                    Choose a video
-                </button>
+
+                <form id="uploadForm">
+
+                    <input
+                        id="videoFile"
+                        type="file"
+                        accept="video/*"
+                        required
+                    >
+
+                    <input
+                        id="videoDescription"
+                        type="text"
+                        maxlength="500"
+                        placeholder="What's happening?"
+                    >
+
+                    <input
+                        id="videoUsername"
+                        type="text"
+                        maxlength="30"
+                        placeholder="Username"
+                        value="anonymous"
+                    >
+
+                    <button
+                        id="uploadSubmit"
+                        type="submit"
+                    >
+                        Upload
+                    </button>
+
+                </form>
+
+                <p id="uploadStatus"></p>
+
             </div>
         </article>
     `;
 
-    const uploadButton = document.getElementById(
-        "uploadPlaceholderButton"
+    const uploadForm =
+        document.getElementById("uploadForm");
+
+    uploadForm.addEventListener(
+        "submit",
+        handleUpload
+    );
+}
+
+// --------------------------------------------------
+// Handle video upload
+// --------------------------------------------------
+
+async function handleUpload(event) {
+    event.preventDefault();
+
+    const fileInput =
+        document.getElementById("videoFile");
+
+    const descriptionInput =
+        document.getElementById("videoDescription");
+
+    const usernameInput =
+        document.getElementById("videoUsername");
+
+    const uploadButton =
+        document.getElementById("uploadSubmit");
+
+    const uploadStatus =
+        document.getElementById("uploadStatus");
+
+    const file = fileInput.files[0];
+
+    if (!file) {
+        uploadStatus.textContent =
+            "Please choose a video first.";
+
+        return;
+    }
+
+    uploadButton.disabled = true;
+
+    uploadStatus.textContent =
+        "Uploading...";
+
+    const formData = new FormData();
+
+    formData.append("video", file);
+
+    formData.append(
+        "description",
+        descriptionInput.value.trim()
     );
 
-    if (uploadButton) {
-        uploadButton.addEventListener("click", () => {
-            alert("Video uploading isn't connected yet.");
+    formData.append(
+        "username",
+        usernameInput.value.trim() || "anonymous"
+    );
+
+    try {
+        const response = await fetch(
+            "/api/videos/upload",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+        let data = null;
+
+        try {
+            data = await response.json();
+        } catch {
+            // Response wasn't JSON.
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                data?.error ||
+                `Upload failed (${response.status})`
+            );
+        }
+
+        uploadStatus.textContent =
+            "Upload successful!";
+
+        // Go back to the feed.
+        state.currentPage = "home";
+
+        bottomNavItems.forEach(item => {
+            item.classList.remove("active");
         });
+
+        const homeButton =
+            document.querySelector(
+                '.bottom-nav-item[data-page="home"]'
+            );
+
+        if (homeButton) {
+            homeButton.classList.add("active");
+        }
+
+        await loadFeed("for-you");
+
+    } catch (error) {
+        console.error(
+            "Upload error:",
+            error
+        );
+
+        uploadStatus.textContent =
+            `Upload failed: ${error.message}`;
+
+        uploadButton.disabled = false;
     }
 }
+
+// --------------------------------------------------
+// Activity
+// --------------------------------------------------
 
 function showNotifications() {
     feed.innerHTML = `
         <article class="video-card placeholder">
             <div class="placeholder-content">
+
                 <div class="play-icon">♡</div>
+
                 <h1>Activity</h1>
+
                 <p>
-                    Likes, comments, follows, and other activity
-                    will appear here.
+                    Likes, comments, follows, and other
+                    activity will appear here.
                 </p>
+
             </div>
         </article>
     `;
 }
 
+// --------------------------------------------------
+// Profile
+// --------------------------------------------------
+
 function showProfile() {
     feed.innerHTML = `
         <article class="video-card placeholder">
             <div class="placeholder-content">
+
                 <div class="play-icon">●</div>
+
                 <h1>Your Profile</h1>
+
                 <p>
-                    Profiles and account settings will be added here.
+                    Profiles and account settings will
+                    be added here.
                 </p>
+
             </div>
         </article>
     `;
@@ -230,26 +396,40 @@ async function loadFeed(feedType = "for-you") {
     feed.innerHTML = `
         <article class="video-card placeholder">
             <div class="placeholder-content">
+
                 <div class="play-icon">▶</div>
+
                 <h1>Loading...</h1>
+
                 <p>
                     Getting your Clipz feed.
                 </p>
+
             </div>
         </article>
     `;
 
     try {
-        const data = await api(`/api/feed?type=${encodeURIComponent(feedType)}`);
+        const data = await api(
+            `/api/feed?type=${encodeURIComponent(feedType)}`
+        );
 
-        if (!data || !Array.isArray(data.videos) || data.videos.length === 0) {
+        if (
+            !data ||
+            !Array.isArray(data.videos) ||
+            data.videos.length === 0
+        ) {
             showEmptyFeed();
             return;
         }
 
         renderFeed(data.videos);
+
     } catch (error) {
-        console.error("Feed error:", error);
+        console.error(
+            "Feed error:",
+            error
+        );
 
         showEmptyFeed();
     }
@@ -259,12 +439,16 @@ function showEmptyFeed() {
     feed.innerHTML = `
         <article class="video-card placeholder">
             <div class="placeholder-content">
+
                 <div class="play-icon">▶</div>
+
                 <h1>No Clipz yet</h1>
+
                 <p>
-                    Your feed is empty. Once videos are uploaded,
-                    they'll appear here.
+                    Upload a video and it will appear
+                    here.
                 </p>
+
             </div>
         </article>
     `;
@@ -274,7 +458,9 @@ function renderFeed(videos) {
     feed.innerHTML = "";
 
     videos.forEach(video => {
-        const card = createVideoCard(video);
+        const card =
+            createVideoCard(video);
+
         feed.appendChild(card);
     });
 }
@@ -284,7 +470,8 @@ function renderFeed(videos) {
 // --------------------------------------------------
 
 function createVideoCard(video) {
-    const card = document.createElement("article");
+    const card =
+        document.createElement("article");
 
     card.className = "video-card";
 
@@ -298,11 +485,19 @@ function createVideoCard(video) {
         ></video>
 
         <div class="video-info">
-            <strong>@${escapeHTML(video.username || "unknown")}</strong>
+
+            <strong>
+                @${escapeHTML(
+                    video.username || "unknown"
+                )}
+            </strong>
 
             <p>
-                ${escapeHTML(video.description || "")}
+                ${escapeHTML(
+                    video.description || ""
+                )}
             </p>
+
         </div>
 
         <div class="video-actions">
@@ -310,7 +505,9 @@ function createVideoCard(video) {
             <button
                 type="button"
                 class="like-button"
-                data-video-id="${escapeHTML(video.id || "")}"
+                data-video-id="${escapeHTML(
+                    video.id || ""
+                )}"
             >
                 ♥
             </button>
@@ -318,7 +515,9 @@ function createVideoCard(video) {
             <button
                 type="button"
                 class="comment-button"
-                data-video-id="${escapeHTML(video.id || "")}"
+                data-video-id="${escapeHTML(
+                    video.id || ""
+                )}"
             >
                 💬
             </button>
@@ -326,7 +525,9 @@ function createVideoCard(video) {
             <button
                 type="button"
                 class="share-button"
-                data-video-id="${escapeHTML(video.id || "")}"
+                data-video-id="${escapeHTML(
+                    video.id || ""
+                )}"
             >
                 ↗
             </button>
@@ -339,62 +540,88 @@ function createVideoCard(video) {
     return card;
 }
 
+// --------------------------------------------------
+// Video behavior
+// --------------------------------------------------
+
 function setupVideoCard(card, video) {
-    const videoElement = card.querySelector(".video-player");
+    const videoElement =
+        card.querySelector(".video-player");
 
     if (!videoElement) {
         return;
     }
 
-    // Clicking a video toggles playback.
-    videoElement.addEventListener("click", () => {
-        if (videoElement.paused) {
-            videoElement.play().catch(() => {});
-        } else {
-            videoElement.pause();
-        }
-    });
-
-    // Automatically play when visible.
-    const observer = new IntersectionObserver(
-        entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    videoElement.play().catch(() => {});
-                } else {
-                    videoElement.pause();
-                }
-            });
-        },
-        {
-            threshold: 0.75
+    videoElement.addEventListener(
+        "click",
+        () => {
+            if (videoElement.paused) {
+                videoElement
+                    .play()
+                    .catch(() => {});
+            } else {
+                videoElement.pause();
+            }
         }
     );
 
+    const observer =
+        new IntersectionObserver(
+            entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        videoElement
+                            .play()
+                            .catch(() => {});
+                    } else {
+                        videoElement.pause();
+                    }
+                });
+            },
+            {
+                threshold: 0.75
+            }
+        );
+
     observer.observe(videoElement);
 
-    const likeButton = card.querySelector(".like-button");
+    const likeButton =
+        card.querySelector(".like-button");
 
     if (likeButton) {
-        likeButton.addEventListener("click", () => {
-            handleLike(video.id, likeButton);
-        });
+        likeButton.addEventListener(
+            "click",
+            () => {
+                handleLike(
+                    video.id,
+                    likeButton
+                );
+            }
+        );
     }
 
-    const commentButton = card.querySelector(".comment-button");
+    const commentButton =
+        card.querySelector(".comment-button");
 
     if (commentButton) {
-        commentButton.addEventListener("click", () => {
-            handleComments(video.id);
-        });
+        commentButton.addEventListener(
+            "click",
+            () => {
+                handleComments(video.id);
+            }
+        );
     }
 
-    const shareButton = card.querySelector(".share-button");
+    const shareButton =
+        card.querySelector(".share-button");
 
     if (shareButton) {
-        shareButton.addEventListener("click", () => {
-            handleShare(video);
-        });
+        shareButton.addEventListener(
+            "click",
+            () => {
+                handleShare(video);
+            }
+        );
     }
 }
 
@@ -408,14 +635,23 @@ async function handleLike(videoId, button) {
     }
 
     try {
-        const data = await api(`/api/videos/${videoId}/like`, {
-            method: "POST"
-        });
+        const data = await api(
+            `/api/videos/${videoId}/like`,
+            {
+                method: "POST"
+            }
+        );
 
-        button.classList.toggle("liked", data.liked);
+        button.classList.toggle(
+            "liked",
+            data.liked
+        );
 
     } catch (error) {
-        console.error("Like error:", error);
+        console.error(
+            "Like error:",
+            error
+        );
     }
 }
 
@@ -425,7 +661,9 @@ async function handleLike(videoId, button) {
 
 function handleComments(videoId) {
     alert(
-        `Comments for ${videoId || "this video"} will be added soon.`
+        `Comments for ${
+            videoId || "this video"
+        } will be added soon.`
     );
 }
 
@@ -434,14 +672,19 @@ function handleComments(videoId) {
 // --------------------------------------------------
 
 async function handleShare(video) {
-    const url = `${window.location.origin}/video/${video.id}`;
+    const url =
+        `${window.location.origin}/video/${video.id}`;
 
     try {
         await navigator.clipboard.writeText(url);
 
         alert("Clipz link copied!");
+
     } catch {
-        prompt("Copy this Clipz link:", url);
+        prompt(
+            "Copy this Clipz link:",
+            url
+        );
     }
 }
 
@@ -449,32 +692,46 @@ async function handleShare(video) {
 // Search
 // --------------------------------------------------
 
-searchButton.addEventListener("click", () => {
-    const query = prompt("What do you want to search for?");
+searchButton.addEventListener(
+    "click",
+    () => {
+        const query =
+            prompt(
+                "What do you want to search for?"
+            );
 
-    if (!query || !query.trim()) {
-        return;
+        if (!query || !query.trim()) {
+            return;
+        }
+
+        console.log(
+            "Search:",
+            query.trim()
+        );
+
+        alert(
+            `Search for "${query.trim()}" will be connected later.`
+        );
     }
-
-    console.log("Search:", query.trim());
-
-    alert(
-        `Search for "${query.trim()}" will be connected to the server later.`
-    );
-});
+);
 
 // --------------------------------------------------
 // Login
 // --------------------------------------------------
 
-loginButton.addEventListener("click", () => {
-    if (state.loggedIn) {
-        showProfile();
-        return;
-    }
+loginButton.addEventListener(
+    "click",
+    () => {
+        if (state.loggedIn) {
+            showProfile();
+            return;
+        }
 
-    alert("Login and account creation will be added soon.");
-});
+        alert(
+            "Login and account creation will be added soon."
+        );
+    }
+);
 
 // --------------------------------------------------
 // HTML escaping
