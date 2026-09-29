@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Clipz</title>
+
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div id="app">
+
+        <header class="topbar">
+            <div class="logo">Clipz</div>
+
+            <div class="top-actions">
+                <button id="searchButton" type="button">Search</button>
+                <button id="loginButton" type="button">Log in</button>
+            </div>
+        </header>
+
+        <main class="main">
+
+            <nav class="feed-tabs">
+                <button class="feed-tab active" data-feed="for-you">
+                    For You
+                </button>
+
+                <button class="feed-tab" data-feed="following">
+                    Following
+                </button>
+            </nav>
+
+            <section id="feed" class="feed">
+
+                <article class="video-card placeholder">
+                    <div class="placeholder-content">
+                        <div class="play-icon">▶</div>
+
+                        <h1>Your Clipz feed</h1>
+
+                        <p>
+                            Videos will appear here once we connect
+                            the feed to the server.
+                        </p>
+                    </div>
+
+                    <div class="video-info">
+                        <strong>@clipz</strong>
+                        <p>Welcome to Clipz!</p>
+                    </div>
+
+                    <div class="video-actions">
+                        <button type="button">♥</button>
+                        <button type="button">💬</button>
+                        <button type="button">↗</button>
+                    </div>
+                </article>
+
+            </section>
+
+        </main>
+
+        <nav class="bottom-nav">
+
+            <button class="bottom-nav-item active" data-page="home">
+                <span>⌂</span>
+                <small>Home</small>
+            </button>
+
+            <button class="bottom-nav-item" data-page="discover">
+                <span>⌕</span>
+                <small>Discover</small>
+            </button>
+
+            <button class="bottom-nav-item upload-button" data-page="upload">
+                <span>＋</span>
+                <small>Upload</small>
+            </button>
+
+            <button class="bottom-nav-item" data-page="notifications">
+                <span>♡</span>
+                <small>Activity</small>
+            </button>
+
+            <button class="bottom-nav-item" data-page="profile">
+                <span>●</span>
+                <small>Profile</small>
+            </button>
+
+        </nav>
+
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>
