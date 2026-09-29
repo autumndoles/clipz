@@ -1,0 +1,459 @@
+/* ================================================
+   Clipz
+   public/style.css
+   ================================================ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #000;
+    color: #fff;
+}
+
+button {
+    font: inherit;
+    color: inherit;
+    border: 0;
+    cursor: pointer;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* ================================================
+   Top Bar
+   ================================================ */
+
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 24px;
+
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(12px);
+
+    z-index: 100;
+}
+
+.logo {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.top-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.top-actions button {
+    padding: 9px 16px;
+    border-radius: 8px;
+    background: #222;
+}
+
+.top-actions button:hover {
+    background: #333;
+}
+
+/* ================================================
+   Main
+   ================================================ */
+
+.main {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* ================================================
+   Feed Tabs
+   ================================================ */
+
+.feed-tabs {
+    position: fixed;
+    top: 64px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    display: flex;
+    gap: 24px;
+
+    z-index: 90;
+}
+
+.feed-tab {
+    padding: 10px 4px;
+    background: transparent;
+    color: #aaa;
+
+    font-weight: 700;
+
+    border-bottom: 2px solid transparent;
+}
+
+.feed-tab:hover {
+    color: #fff;
+}
+
+.feed-tab.active {
+    color: #fff;
+    border-bottom-color: #fff;
+}
+
+/* ================================================
+   Video Feed
+   ================================================ */
+
+.feed {
+    width: 100%;
+    height: 100%;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    scroll-snap-type: y mandatory;
+
+    scrollbar-width: none;
+}
+
+.feed::-webkit-scrollbar {
+    display: none;
+}
+
+/* ================================================
+   Video Card
+   ================================================ */
+
+.video-card {
+    position: relative;
+
+    width: 100%;
+    height: 100vh;
+
+    min-height: 500px;
+
+    scroll-snap-align: start;
+
+    overflow: hidden;
+
+    background: #111;
+}
+
+.video-player {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    background: #000;
+}
+
+/* ================================================
+   Video Information
+   ================================================ */
+
+.video-info {
+    position: absolute;
+
+    left: 24px;
+    bottom: 100px;
+
+    max-width: 65%;
+
+    z-index: 10;
+
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.video-info strong {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 17px;
+}
+
+.video-info p {
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+/* ================================================
+   Video Actions
+   ================================================ */
+
+.video-actions {
+    position: absolute;
+
+    right: 24px;
+    bottom: 100px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    z-index: 20;
+}
+
+.video-actions button {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(20, 20, 20, 0.75);
+
+    font-size: 23px;
+
+    transition:
+        transform 0.15s ease,
+        background 0.15s ease;
+}
+
+.video-actions button:hover {
+    transform: scale(1.08);
+    background: rgba(50, 50, 50, 0.9);
+}
+
+.video-actions button:active {
+    transform: scale(0.92);
+}
+
+.video-actions .liked {
+    background: rgba(255, 60, 90, 0.85);
+}
+
+/* ================================================
+   Placeholder
+   ================================================ */
+
+.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #202020 0%,
+            #0d0d0d 55%,
+            #000 100%
+        );
+}
+
+.placeholder-content {
+    width: min(500px, 80%);
+
+    text-align: center;
+}
+
+.placeholder-content h1 {
+    margin-bottom: 12px;
+    font-size: 30px;
+}
+
+.placeholder-content p {
+    color: #aaa;
+    line-height: 1.5;
+}
+
+.play-icon {
+    width: 80px;
+    height: 80px;
+
+    margin: 0 auto 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #222;
+
+    font-size: 30px;
+}
+
+/* ================================================
+   Bottom Navigation
+   ================================================ */
+
+.bottom-nav {
+    position: fixed;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 72px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 45px;
+
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(12px);
+
+    z-index: 100;
+}
+
+.bottom-nav-item {
+    min-width: 60px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+
+    background: transparent;
+    color: #888;
+}
+
+.bottom-nav-item span {
+    font-size: 23px;
+    line-height: 1;
+}
+
+.bottom-nav-item small {
+    font-size: 11px;
+}
+
+.bottom-nav-item:hover {
+    color: #fff;
+}
+
+.bottom-nav-item.active {
+    color: #fff;
+}
+
+/* Upload button */
+
+.bottom-nav-item.upload-button span {
+    width: 42px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #fff;
+    color: #000;
+
+    font-size: 25px;
+}
+
+/* ================================================
+   Upload Placeholder Button
+   ================================================ */
+
+#uploadPlaceholderButton {
+    margin-top: 20px;
+
+    padding: 12px 20px;
+
+    border-radius: 8px;
+
+    background: #fff;
+    color: #000;
+
+    font-weight: 700;
+}
+
+#uploadPlaceholderButton:hover {
+    background: #ddd;
+}
+
+/* ================================================
+   Mobile
+   ================================================ */
+
+@media (max-width: 600px) {
+
+    .topbar {
+        height: 56px;
+        padding: 0 14px;
+    }
+
+    .logo {
+        font-size: 23px;
+    }
+
+    .top-actions button {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .feed-tabs {
+        top: 56px;
+        gap: 18px;
+    }
+
+    .video-info {
+        left: 16px;
+        bottom: 90px;
+        max-width: 70%;
+    }
+
+    .video-actions {
+        right: 14px;
+        bottom: 90px;
+        gap: 12px;
+    }
+
+    .video-actions button {
+        width: 46px;
+        height: 46px;
+        font-size: 20px;
+    }
+
+    .bottom-nav {
+        height: 64px;
+        gap: 12px;
+        justify-content: space-around;
+    }
+
+    .bottom-nav-item {
+        min-width: 50px;
+    }
+
+    .bottom-nav-item span {
+        font-size: 21px;
+    }
+
+    .bottom-nav-item small {
+        font-size: 10px;
+    }
+}
