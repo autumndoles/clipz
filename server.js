@@ -33,7 +33,13 @@ app.use(express.static(PUBLIC_DIR));
 // --------------------------------------------------
 // Basic API
 // --------------------------------------------------
-
+app.get("/api/videos/upload", (req, res) => {
+    res.json({
+        success: true,
+        uploadRoute: true,
+        message: "Clipz upload endpoint is deployed."
+    });
+});
 app.get("/api/status", (req, res) => {
     res.json({
         success: true,
